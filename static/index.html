@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shelf</title>
+<style>
+  :root {
+    --ink: #23241f;
+    --paper: #f6f3ec;
+    --paper-dim: #ece7db;
+    --rule: #d8d1bf;
+    --ochre: #b6812c;
+    --ochre-deep: #8f6420;
+    font-size: 16px;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "Iowan Old Style", "Georgia", "Times New Roman", serif;
+    line-height: 1.5;
+  }
+
+  .ui {
+    font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+  }
+
+  header {
+    border-bottom: 1px solid var(--rule);
+    padding: 1.6rem 2rem 1.2rem;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+  }
+
+  .wordmark {
+    font-size: 1.6rem;
+    letter-spacing: 0.01em;
+  }
+
+  .wordmark span { color: var(--ochre-deep); }
+
+  nav.ui {
+    display: flex;
+    gap: 0.4rem;
+    align-items: center;
+  }
+
+  nav.ui button {
+    background: none;
+    border: 1px solid var(--rule);
+    color: var(--ink);
+    padding: 0.4rem 0.9rem;
+    font-size: 0.9rem;
+    cursor: pointer;
+    border-radius: 3px;
+  }
+
+  nav.ui button.active {
+    background: var(--ink);
+    color: var(--paper);
+    border-color: var(--ink);
+  }
+
+  .user-picker.ui {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.85rem;
+    color: #5a5a52;
+  }
+
+  .user-picker input {
+    width: 3.2rem;
+    padding: 0.3rem 0.4rem;
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    font-family: inherit;
+  }
+
+  main {
+    max-width: 74rem;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  .lede {
+    max-width: 42rem;
+    color: #4c4c44;
+    font-size: 1.02rem;
+    margin-bottom: 2rem;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
+    gap: 0;
+    border-top: 1px solid var(--rule);
+    border-left: 1px solid var(--rule);
+  }
+
+  .card {
+    border-right: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    padding: 1.1rem 1.1rem 1rem;
+    cursor: pointer;
+    background: var(--paper);
+    transition: background 0.12s ease;
+  }
+
+  .card:hover { background: var(--paper-dim); }
+
+  .swatch {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    border-radius: 2px;
+    margin-bottom: 0.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: -apple-system, sans-serif;
+    font-size: 1.5rem;
+    color: rgba(255,255,255,0.85);
+  }
+
+  .name {
+    font-size: 1.02rem;
+    margin: 0 0 0.15rem;
+  }
+
+  .meta.ui {
+    font-size: 0.78rem;
+    color: #6b6b60;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .rating {
+    color: var(--ochre-deep);
+  }
+
+  .add-cart.ui {
+    margin-top: 0.7rem;
+    width: 100%;
+    background: none;
+    border: 1px solid var(--rule);
+    color: var(--ink);
+    padding: 0.4rem 0;
+    font-size: 0.78rem;
+    cursor: pointer;
+    border-radius: 3px;
+  }
+
+  .add-cart.ui:hover { border-color: var(--ochre-deep); color: var(--ochre-deep); }
+  .add-cart.ui:disabled { color: var(--ochre-deep); border-color: var(--ochre-deep); cursor: default; }
+
+  .panel-title {
+    font-size: 1.15rem;
+    margin: 2.4rem 0 0.9rem;
+    padding-top: 1.4rem;
+    border-top: 1px solid var(--rule);
+  }
+
+  .panel-title .small.ui {
+    font-size: 0.8rem;
+    color: #6b6b60;
+    display: block;
+    margin-top: 0.2rem;
+  }
+
+  .empty.ui {
+    color: #8a8a7d;
+    font-size: 0.92rem;
+    padding: 1rem 0;
+  }
+
+  .loading.ui {
+    color: #8a8a7d;
+    font-size: 0.85rem;
+  }
+
+  footer.ui {
+    max-width: 74rem;
+    margin: 0 auto;
+    padding: 1.2rem 2rem 2.4rem;
+    color: #9a9a8d;
+    font-size: 0.78rem;
+  }
+
+  @media (max-width: 30rem) {
+    header { padding: 1.2rem 1.2rem 1rem; }
+    main { padding: 1.2rem; }
+    footer.ui { padding: 1.2rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wordmark">Shelf<span>.</span></div>
+  <nav class="ui">
+    <button id="tab-browse" class="active">Browse</button>
+    <button id="tab-foryou">For you</button>
+    <span class="user-picker" id="user-picker" style="display:none;">
+      as user <input type="number" id="user-id" value="1" min="1">
+    </span>
+  </nav>
+</header>
+
+<main>
+  <p class="lede" id="lede">
+    Every item here was picked by the same engine that runs behind this catalog.
+    Pick something to see what it puts next to it on the shelf.
+  </p>
+
+  <div id="grid" class="grid"></div>
+
+  <div id="detail"></div>
+</main>
+
+<footer class="ui">Local demo — recommendations computed by the hybrid engine, served from the same API this page calls.</footer>
+
+<script>
+const API = "";
+let mode = "browse";
+
+// A stable per-browser-tab session id, so real events chain together
+// the same way the seeded data's sessions do.
+function getSessionId() {
+  let id = sessionStorage.getItem("shelf_session_id");
+  if (!id) {
+    id = crypto.randomUUID();
+    sessionStorage.setItem("shelf_session_id", id);
+  }
+  return id;
+}
+const sessionId = getSessionId();
+
+function currentUserId() {
+  // Only attach a user_id when "For you" is active and a value is set —
+  // otherwise this is an anonymous/guest event, same as a real visitor.
+  if (mode !== "foryou") return null;
+  const v = parseInt(userIdInput.value, 10);
+  return Number.isFinite(v) ? v : null;
+}
+
+async function logEvent(eventType, productId = null, extra = {}) {
+  try {
+    await fetch(`${API}/api/events`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        session_id: sessionId,
+        user_id: currentUserId(),
+        product_id: productId,
+        event_type: eventType,
+        metadata: extra,
+      }),
+    });
+  } catch (e) {
+    // Tracking failures shouldn't break browsing — log and move on.
+    console.warn("event log failed:", e);
+  }
+}
+
+logEvent("login");
+
+const grid = document.getElementById("grid");
+const detail = document.getElementById("detail");
+const lede = document.getElementById("lede");
+const userPicker = document.getElementById("user-picker");
+const userIdInput = document.getElementById("user-id");
+
+const swatchPalette = ["#8a6b4f", "#5f6b53", "#7a5a63", "#4f6470", "#8f6420", "#6b5b7a"];
+function swatchColor(id) { return swatchPalette[id % swatchPalette.length]; }
+function initials(name) {
+  return name.split(" ").slice(0, 2).map(w => w[0]).join("").toUpperCase();
+}
+
+function productCard(p, onClick, source) {
+  const el = document.createElement("div");
+  el.className = "card";
+  el.innerHTML = `
+    <div class="swatch" style="background:${swatchColor(p.product_id)}">${initials(p.name || "")}</div>
+    <p class="name">${p.name}</p>
+    <div class="meta ui">
+      <span>${p.brand || ""}</span>
+      <span class="rating">${p.rating != null ? "★ " + p.rating : (p.rating_avg ? "★ " + p.rating_avg : "")}</span>
+    </div>
+    <button class="add-cart ui" type="button">Add to cart</button>
+  `;
+  el.addEventListener("click", (e) => {
+    if (e.target.closest(".add-cart")) return; // handled separately below
+    logEvent("product_view", p.product_id, { source: source || "browse" });
+    onClick(p);
+  });
+  el.querySelector(".add-cart").addEventListener("click", (e) => {
+    e.stopPropagation();
+    logEvent("add_to_cart", p.product_id, { source: source || "browse" });
+    const btn = e.target;
+    const original = btn.textContent;
+    btn.textContent = "Added ✓";
+    btn.disabled = true;
+    setTimeout(() => { btn.textContent = original; btn.disabled = false; }, 1200);
+  });
+  return el;
+}
+
+async function fetchJSON(url) {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error("Request failed: " + res.status);
+  return res.json();
+}
+
+async function loadBrowse() {
+  lede.textContent = "Every item here was picked by the same engine that runs behind this catalog. Pick something to see what it puts next to it on the shelf.";
+  grid.innerHTML = "";
+  detail.innerHTML = `<p class="loading ui">Loading the shelf...</p>`;
+  try {
+    const data = await fetchJSON(`${API}/api/products?n=24`);
+    detail.innerHTML = "";
+    grid.innerHTML = "";
+    data.products.forEach(p => grid.appendChild(productCard(p, showRelated, "browse")));
+  } catch (e) {
+    detail.innerHTML = `<p class="empty ui">Couldn't load products (${e.message}). Is app.py running?</p>`;
+  }
+}
+
+async function showRelated(p) {
+  detail.innerHTML = `
+    <h2 class="panel-title">Also on this shelf
+      <span class="small ui">because you looked at ${p.name}</span>
+    </h2>
+    <p class="loading ui">Finding what goes with it...</p>
+  `;
+  try {
+    const data = await fetchJSON(`${API}/api/products/${p.product_id}/recommendations?n=8`);
+    const panelGrid = document.createElement("div");
+    panelGrid.className = "grid";
+    if (!data.recommendations.length) {
+      detail.querySelector(".loading").outerHTML = `<p class="empty ui">Nothing similar found for this item yet.</p>`;
+      return;
+    }
+    data.recommendations.forEach(r => panelGrid.appendChild(productCard(r, showRelated, "recommendation")));
+    detail.querySelector(".loading").remove();
+    detail.appendChild(panelGrid);
+  } catch (e) {
+    detail.innerHTML += `<p class="empty ui">Couldn't load recommendations (${e.message}).</p>`;
+  }
+}
+
+async function loadForYou() {
+  const userId = userIdInput.value || 1;
+  lede.textContent = `What the engine would put in front of user ${userId}, based on everything they've viewed, carted, and bought so far.`;
+  grid.innerHTML = "";
+  detail.innerHTML = `<p class="loading ui">Building a shelf for user ${userId}...</p>`;
+  try {
+    const data = await fetchJSON(`${API}/api/users/${userId}/recommendations?n=16`);
+    detail.innerHTML = "";
+    if (!data.recommendations.length) {
+      grid.innerHTML = `<p class="empty ui" style="grid-column:1/-1;">No history yet for this user — falling back to popular items would happen automatically once they have some.</p>`;
+      return;
+    }
+    data.recommendations.forEach(r => grid.appendChild(productCard(r, showRelated, "recommendation")));
+  } catch (e) {
+    grid.innerHTML = `<p class="empty ui" style="grid-column:1/-1;">Couldn't load recommendations (${e.message}).</p>`;
+  }
+}
+
+document.getElementById("tab-browse").addEventListener("click", () => {
+  mode = "browse";
+  document.getElementById("tab-browse").classList.add("active");
+  document.getElementById("tab-foryou").classList.remove("active");
+  userPicker.style.display = "none";
+  loadBrowse();
+});
+
+document.getElementById("tab-foryou").addEventListener("click", () => {
+  mode = "foryou";
+  document.getElementById("tab-foryou").classList.add("active");
+  document.getElementById("tab-browse").classList.remove("active");
+  userPicker.style.display = "inline-flex";
+  loadForYou();
+});
+
+userIdInput.addEventListener("change", () => { if (mode === "foryou") loadForYou(); });
+
+loadBrowse();
+</script>
+
+</body>
+</html>
